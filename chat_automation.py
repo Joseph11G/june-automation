@@ -14,7 +14,7 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException,
 from selenium.webdriver.common.action_chains import ActionChains
 from webdriver_manager.chrome import ChromeDriverManager
 
-# --- CONFIGURATION ---
+
 AI_WEBSITE_URL = "https://askjune.ai/app/chat"
 INPUT_BOX_XPATH = "//textarea[@placeholder='Type your question here...']"
 SEND_BUTTON_XPATH = "//button[@aria-label='submit']"
@@ -24,7 +24,7 @@ PROGRESS_FILE = "progress.json"
 MODEL_TRACKING_FILE = "model_tracking.json"
 PERSISTENT_PROFILE_DIR = os.path.join(os.getcwd(), "chrome_profile")
 
-# Model configurations
+
 MODELS = [
     "Qwen3 235B A22B",
     "June Qwen3 32B", 
@@ -54,7 +54,7 @@ RESPONSE_SELECTORS = [
     "div[class*='markdown']"
 ]
 
-# --- Load questions from file ---
+
 try:
     with open("questions.txt", "r", encoding="utf-8") as f:
         QUESTIONS = [line.strip() for line in f if line.strip()]
@@ -66,7 +66,7 @@ except FileNotFoundError:
             f.write(q + "\n")
     print("✅ Created questions.txt with sample questions")
 
-# --- Progress Management ---
+
 def load_progress():
     """Load saved progress and model tracking."""
     start_index = 0
@@ -154,7 +154,7 @@ class ModelManager:
         try:
             print(f"🔄 Attempting to switch model...")
             
-            # Human-like delay
+            
             time.sleep(random.uniform(1, 3))
             
             # Click model selector dropdown
@@ -162,11 +162,11 @@ class ModelManager:
                 EC.element_to_be_clickable((By.XPATH, MODEL_SELECTOR_XPATH))
             )
             
-            # Scroll to element if needed
+          
             self.driver.execute_script("arguments[0].scrollIntoView(true);", model_button)
             time.sleep(0.5)
             
-            # Try different click methods
+           
             try:
                 model_button.click()
             except ElementClickInterceptedException:
@@ -174,7 +174,7 @@ class ModelManager:
             
             time.sleep(random.uniform(1, 2))
             
-            # Select target model or first available
+         
             if not target_model:
                 target_model = self.get_available_model()
             
@@ -189,7 +189,7 @@ class ModelManager:
                     EC.element_to_be_clickable((By.XPATH, model_xpath))
                 )
                 
-                # Hover before clicking (more human-like)
+               
                 actions = ActionChains(self.driver)
                 actions.move_to_element(model_option).pause(0.5).click().perform()
                 
@@ -236,7 +236,7 @@ class ModelManager:
         usage_time = self.model_data[self.current_model].get("usage_time", 0)
         return usage_time >= (MODEL_USAGE_LIMIT_HOURS * 3600 - 600)  # Switch 10 min before limit
 
-# --- Response Detection ---
+# --- Response Detection --- (stiil needs a bit more work)
 def wait_for_response_improved(driver, timeout=10, check_interval=1):
     """
     Improved response detection using multiple strategies.
@@ -245,7 +245,7 @@ def wait_for_response_improved(driver, timeout=10, check_interval=1):
     end_time = time.time() + timeout
     last_text = ""
     stable_count = 0
-    required_stable_checks = 3  # Text must be stable for 3 checks
+    required_stable_checks = 3 
     
     # Strategy 1: Try multiple selectors
     while time.time() < end_time:
@@ -285,12 +285,12 @@ def wait_for_response_improved(driver, timeout=10, check_interval=1):
                         stable_count = 0  # Reset if still typing
                         break
                 
-                break  # If we found messages with this selector, don't try others
+                break  
                 
             except Exception:
                 continue
         
-        # Strategy 2: Check for stop/regenerate button appearance
+    
         try:
             stop_buttons = driver.find_elements(By.CSS_SELECTOR, "[class*='stop'], [class*='regenerate'], button[aria-label*='stop']")
             if stop_buttons:
@@ -301,7 +301,7 @@ def wait_for_response_improved(driver, timeout=10, check_interval=1):
         except:
             pass
         
-        # Strategy 3: Check page activity (JavaScript execution)
+      
         try:
             is_loading = driver.execute_script("""
                 return document.readyState !== 'complete' || 
